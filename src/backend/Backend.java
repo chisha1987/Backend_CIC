@@ -1,50 +1,42 @@
 package backend;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
-//import java.util.Scanner;
+import java.util.Scanner;
 
 import org.json.*;
 
-
+/**
+ * Back-end for the <a href=http://cic-challenge.eu-gb.mybluemix.net/challenge.html>CIC-Challenge</a>.
+ * <p>
+ * This program explicit implements the CO2 emissions of public buildings of San Francisco.
+ * <p>
+ * Due to time constrains, the filter function is very crude and needs change of the source code to see the different outcome.  
+ * 
+ * @author Meisl Ulrich
+ *
+ */
 public class Backend {
 
-	
+	/**
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		ArrayList<JSONObject> jsonObj = new ArrayList<JSONObject>();
 		ArrayList<JSONObject> outputObj = new ArrayList<JSONObject>();
 		
-		/*
-		Scanner filterScan = new Scanner(System.in);
-		String filterKey = "";
-		String filterValue = "";
-		
-		if(filterScan.hasNextLine())
-		{
-			filterKey = filterScan.nextLine();
-			if(filterScan.hasNextLine())
-			{
-				filterValue = filterScan.nextLine();
-			}
-		}
-		filterScan.close();
-		
-		
-		System.out.println(filterKey);
-		
-		System.out.println(filterValue);
-		*/
-		
 		//crude Filter
-		
 		String crudeFilterKey = "";
-		crudeFilterKey = "d"; // department
-		//crudeFilterKey = "s"; //source
+		//crudeFilterKey = "d"; // department
+		crudeFilterKey = "s"; //source
 	
 		
 		String filterValue = "";
 		
-		filterValue = "Municipal Transportation Agency";
+		filterValue = "Electric";
 		
 		/*
 		 * departments
@@ -86,7 +78,7 @@ public class Backend {
 		
 		
 		try {
-			jsonObj = JSONReader.readJsonFromUrl("https://data.sfgov.org/resource/pxac-sadh.json");
+			jsonObj = readJsonFromUrl("https://data.sfgov.org/resource/pxac-sadh.json");
 		} catch (JSONException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -118,11 +110,61 @@ public class Backend {
 			outputObj = jsonObj;
 		}
 		
-		System.out.println(outputObj.size());
+		for(JSONObject j : outputObj)
+		{
+			System.out.println(j.toString());
+		}
 		
+		//System.out.println(outputObj.size());
 		//System.out.println(jsonObj.toString());
-		System.out.println(outputObj.toString());
-	
+		//System.out.println(outputObj.toString());
 	}
-
+	
+	/**
+	 * Reads the <code>JSONObjects</code> from the Data given by an <code>URL</code>.
+	 * <p>
+	 * All Datasets with 0 CO2 emission will be removed.	
+	 * 
+	 * @param url The <code>URL</code> of the data to be read
+	 * @return ArrayList containing the <code>JSONObjects</code>
+	 * @throws IOException
+	 * @throws JSONException
+	 */
+	 static ArrayList<JSONObject> readJsonFromUrl(String url) throws IOException, JSONException {
+			
+			ArrayList<JSONObject> jsonObjectList = new ArrayList<JSONObject>();
+			String[] keys = new String[] {"department", "source_type", "emissions_mtco2e"};
+			
+		    InputStream in = new URL(url).openStream();
+		   
+		    Scanner scan = new Scanner(in);
+		    String jsonText = scan.useDelimiter("\\Z").next();
+		    
+		    jsonText = jsonText.replace('[', ' ');
+		    jsonText = jsonText.replace(']', ' ');
+		    
+		    scan.close();
+		    
+		    scan = new Scanner(jsonText);
+		        
+		    String line;
+		    JSONObject jsonTest;
+		    Double co2e;
+		    
+		    while (scan.hasNextLine())
+		    {
+		    	line = scan.nextLine().substring(1);
+		    	jsonTest = new JSONObject(line);
+		    	co2e = Double.parseDouble(jsonTest.getString("emissions_mtco2e"));
+		    	
+		    	if(co2e > 0.0)
+			    {
+			    	jsonObjectList.add(new JSONObject(jsonTest, keys));
+			    }
+		    }
+		    
+		    scan.close();
+		        
+		    return jsonObjectList;
+		}
 }
