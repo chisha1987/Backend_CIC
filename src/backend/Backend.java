@@ -29,9 +29,9 @@ public class Backend {
 		ArrayList<JSONObject> outputObj = new ArrayList<JSONObject>();
 		
 		//crude Filter
-		String crudeFilterKey = "";
+		String filterKey = "";
 		//crudeFilterKey = "d"; // department
-		crudeFilterKey = "s"; //source
+		filterKey = "s"; //source
 	
 		
 		String filterValue = "";
@@ -85,7 +85,7 @@ public class Backend {
 		}
 
 		
-		if(crudeFilterKey == "d")
+		if(filterKey == "d")
 		{
 			for(JSONObject j : jsonObj)
 			{
@@ -95,7 +95,7 @@ public class Backend {
 				}
 			}
 		}
-		else if(crudeFilterKey == "s")
+		else if(filterKey == "s")
 		{
 			for(JSONObject j : jsonObj)
 			{
