@@ -21,7 +21,7 @@ Gewähltes Thema __CO2 Emissionen von öffentlichen Gebäuden in San Francisco__
 
 ### Einlesen der Daten 
 
-Die Funktion zum Einlesen ```java static ArrayList<JSONObject> readJsonFromUrl(String url) throws IOException, JSONException ``` 
+Die Funktion zum Einlesen ```static ArrayList<JSONObject> readJsonFromUrl(String url) throws IOException, JSONException ``` 
 ist nur auf diese Challenge zugeschnitten. 
 Sie liest die Daten über einen Inputstream ein und entfernt alle Einträge bei denen der CO2 Gehalt größer als 0 ist. 
 Als Rückgabeparameter dient eine ArrayList in welcher alle JSONObjects stehen. 
@@ -33,12 +33,12 @@ Da die Einlese Funktion für den Filter Probleme machte und die maximale Zeit so
 
 Zum Verändern des Filters ist leider eine Änderung des Source Codes nötig. 
 
-```java filterKey``` 
+``` filterKey``` 
 Je nachdem welcher Schlüssel gewählt wird entweder nach department "d", source_type "s" oder gar nicht (alles andere) gefiltert. 
 
   
 
-```java filterValue``` 
+```filterValue``` 
 Wenn als filterKey "s" oder "d" gewählt wurde, werden nur jene Objekte welche diesen wert beim gewählten Key haben in die Endgültige Liste übernommen. 
 Sollte der es kein Objekt mit entsprechenden Wert geben so bleibt die Liste lehr. 
 Alle gültigen filterValue stehen im Source-code, 
