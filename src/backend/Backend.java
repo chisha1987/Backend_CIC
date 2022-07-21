@@ -25,18 +25,19 @@ public class Backend {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		ArrayList<JSONObject> jsonObj = new ArrayList<JSONObject>();
 		ArrayList<JSONObject> outputObj = new ArrayList<JSONObject>();
 		
 		//crude Filter
 		String filterKey = "";
 		//crudeFilterKey = "d"; // department
-		filterKey = "s"; //source
+		//filterKey = "s"; //source
 	
 		
 		String filterValue = "";
 		
-		filterValue = "Electric";
+		//filterValue = "Electric";
 		
 		/*
 		 * departments
@@ -76,9 +77,9 @@ public class Backend {
 		
 		*/
 		
-		
+		//https://data.sfgov.org/resource/pxac-sadh.json?department=Public+Health&$where=emissions_mtco2e%3E0.0&source_type=Propane&$select=department,source_type,emissions_mtco2e
 		try {
-			jsonObj = readJsonFromUrl("https://data.sfgov.org/resource/pxac-sadh.json");
+			jsonObj = readJsonFromUrl("https://data.sfgov.org/resource/pxac-sadh.json?$where=emissions_mtco2e>0.0&department=Public%20Health");
 		} catch (JSONException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -149,18 +150,13 @@ public class Backend {
 		        
 		    String line;
 		    JSONObject jsonTest;
-		    Double co2e;
 		    
 		    while (scan.hasNextLine())
 		    {
 		    	line = scan.nextLine().substring(1);
 		    	jsonTest = new JSONObject(line);
-		    	co2e = Double.parseDouble(jsonTest.getString("emissions_mtco2e"));
-		    	
-		    	if(co2e > 0.0)
-			    {
-			    	jsonObjectList.add(new JSONObject(jsonTest, keys));
-			    }
+		    	jsonObjectList.add(new JSONObject(jsonTest, keys));
+			    
 		    }
 		    
 		    scan.close();
