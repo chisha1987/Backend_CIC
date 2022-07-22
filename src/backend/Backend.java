@@ -1,9 +1,8 @@
 package backend;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.json.*;
@@ -13,7 +12,6 @@ import org.json.*;
  * <p>
  * This program explicit implements the CO2 emissions of public buildings of San Francisco.
  * <p>
- * Due to time constrains, the filter function is very crude and needs change of the source code to see the different outcome.  
  * 
  * @author Meisl Ulrich
  *
@@ -26,18 +24,72 @@ public class Backend {
 	 */
 	public static void main(String[] args) {
 		
-		ArrayList<JSONObject> jsonObj = new ArrayList<JSONObject>();
-		ArrayList<JSONObject> outputObj = new ArrayList<JSONObject>();
+		String urlString = "https://data.sfgov.org/resource/pxac-sadh.json";
 		
-		//crude Filter
-		String filterKey = "";
-		//crudeFilterKey = "d"; // department
-		//filterKey = "s"; //source
+		boolean filterDepartment = true;
+		boolean filterSource_type = true;
+		
+		String departmentFilterKey = "Public Health";
+		String source_typeFilterKey = "Propane";
+		
+		
+		//Only emissions greater than 0.0
+		urlString = urlString + "?$where=emissions_mtco2e>0.0";
+		
+		//We need only department, source_type and emisions_mtco2e
+		urlString = urlString + "&$select=department,source_type,emissions_mtco2e";
+		
+		//adding filter for department if needed
+		if(filterDepartment)
+		{
+			departmentFilterKey = departmentFilterKey.replace(" ", "%20");
+			urlString = urlString + "&department=" + departmentFilterKey;
+		}
+		
+		//adding filter for source_type if needed
+		if(filterSource_type)
+		{
+			source_typeFilterKey = source_typeFilterKey.replace(" ", "%20");
+			urlString = urlString + "&source_type=" + source_typeFilterKey;
+		}
+			
+		try {
+			URL url = new URL(urlString);
+			
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+
+            //Getting the response code
+            int responsecode = conn.getResponseCode();
+			
+            if (responsecode != 200) {
+                throw new RuntimeException("HttpResponseCode: " + responsecode);
+            }
+            else
+            {
+            	String inline = "";
+            	Scanner scan = new Scanner(url.openStream());
+            	
+            	while (scan.hasNext())
+        		{
+        			inline += scan.nextLine();
+        		}
+        		    
+        		//Close the scanner
+        		scan.close();
+        		
+        		JSONArray array = new JSONArray(inline);
+        		
+        		System.out.println(array.toString());
+            	
+            }
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		   
 	
-		
-		String filterValue = "";
-		
-		//filterValue = "Electric";
 		
 		/*
 		 * departments
@@ -76,91 +128,6 @@ public class Backend {
 		Steam
 		
 		*/
-		
-		//https://data.sfgov.org/resource/pxac-sadh.json?department=Public+Health&$where=emissions_mtco2e%3E0.0&source_type=Propane&$select=department,source_type,emissions_mtco2e
-		try {
-			jsonObj = readJsonFromUrl("https://data.sfgov.org/resource/pxac-sadh.json?$where=emissions_mtco2e>0.0&department=Public%20Health");
-		} catch (JSONException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-		
-		if(filterKey == "d")
-		{
-			for(JSONObject j : jsonObj)
-			{
-				if(j.getString("department").compareTo(filterValue) == 0)
-				{
-					outputObj.add(j);
-				}
-			}
-		}
-		else if(filterKey == "s")
-		{
-			for(JSONObject j : jsonObj)
-			{
-				if(j.getString("source_type").compareTo(filterValue) == 0)
-				{
-					outputObj.add(j);
-				}
-			}
-		}
-		else
-		{
-			outputObj = jsonObj;
-		}
-		
-		for(JSONObject j : outputObj)
-		{
-			System.out.println(j.toString());
-		}
-		
-		//System.out.println(outputObj.size());
-		//System.out.println(jsonObj.toString());
-		//System.out.println(outputObj.toString());
 	}
-	
-	/**
-	 * Reads the <code>JSONObjects</code> from the Data given by an <code>URL</code>.
-	 * <p>
-	 * All Datasets with 0 CO2 emission will be removed.	
-	 * 
-	 * @param url The <code>URL</code> of the data to be read
-	 * @return ArrayList containing the <code>JSONObjects</code>
-	 * @throws IOException
-	 * @throws JSONException
-	 */
-	 static ArrayList<JSONObject> readJsonFromUrl(String url) throws IOException, JSONException {
-			
-			ArrayList<JSONObject> jsonObjectList = new ArrayList<JSONObject>();
-			String[] keys = new String[] {"department", "source_type", "emissions_mtco2e"};
-			
-		    InputStream in = new URL(url).openStream();
-		   
-		    Scanner scan = new Scanner(in);
-		    String jsonText = scan.useDelimiter("\\Z").next();
-		    
-		    jsonText = jsonText.replace('[', ' ');
-		    jsonText = jsonText.replace(']', ' ');
-		    
-		    scan.close();
-		    
-		    scan = new Scanner(jsonText);
-		        
-		    String line;
-		    JSONObject jsonTest;
-		    
-		    while (scan.hasNextLine())
-		    {
-		    	line = scan.nextLine().substring(1);
-		    	jsonTest = new JSONObject(line);
-		    	jsonObjectList.add(new JSONObject(jsonTest, keys));
-			    
-		    }
-		    
-		    scan.close();
-		        
-		    return jsonObjectList;
-		}
 }
