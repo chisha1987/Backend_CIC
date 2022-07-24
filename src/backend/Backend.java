@@ -7,6 +7,8 @@ import java.util.Scanner;
 
 import org.json.*;
 
+import gnu.getopt.Getopt;
+
 /**
  * Back-end for the <a href=http://cic-challenge.eu-gb.mybluemix.net/challenge.html>CIC-Challenge</a>.
  * <p>
@@ -23,14 +25,41 @@ public class Backend {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+
 		
 		String urlString = "https://data.sfgov.org/resource/pxac-sadh.json";
 		
-		boolean filterDepartment = true;
-		boolean filterSource_type = true;
 		
-		String departmentFilterKey = "Public Health";
-		String source_typeFilterKey = "Propane";
+		Getopt g = new Getopt("Backend_CIC", args, "d:s:");
+		
+		int c;
+		boolean filterDepartment = false;
+		boolean filterSource_type = false;
+		String departmentFilterKey = "";
+		String source_typeFilterKey = "";
+		
+		 while ((c = g.getopt()) != -1)
+		   {
+		     switch(c)
+		       {
+		          case 'd':
+		        	  filterDepartment = true;
+		        	  departmentFilterKey = g.getOptarg();
+		            break;
+		            //
+		          case 's':
+		        	  filterSource_type = true;
+		        	  source_typeFilterKey = g.getOptarg();
+		            break;
+		            //
+		          case '?':
+		            break; // getopt() already printed an error
+		            //
+		          default:
+		            System.out.print("getopt() returned " + c + "\n");
+		       }
+		   }
+		
 		
 		
 		//Only emissions greater than 0.0
